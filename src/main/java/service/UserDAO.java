@@ -1,25 +1,59 @@
 package service;
 
-import model.Address;
+
+import model.Order;
 import model.User;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import util.HibernateUtil;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class UserDAO {
-    private static void createUser(String firstName, String lastName, Address address, String email, String password, LocalDateTime birthDate) {
+    private Session session;
+
+    void openSession() {session = HibernateUtil.getSessionFactory().openSession();}
+
+    public User findById(int id){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        User user = session.find(User.class, id);
+        session.close();
+        return user;
+    }
+
+    public void insertUser(User user){
         Session session = HibernateUtil.getSessionFactory().openSession();
         session.beginTransaction();
-        User newUser = new User();
-        newUser.setFirstName(firstName);
-        newUser.setLastName(lastName);
-        newUser.setAddress(address);
-        newUser.setEmail(email);
-        newUser.setPassword(password);
-        newUser.setBirthDate(birthDate);
-        session.persist(newUser);
+        session.persist(user);
         session.flush();
         session.close();
     }
+
+    public void deleteUser(User user){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.delete(user);
+        session.flush();
+        session.close();
+    }
+
+    public void updateUser(User user){
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        if(session.find(User.class, user.getId()) != null) {
+            session.merge(user);
+        }
+        session.flush();
+        session.close();
+    }
+
+    public List<User> findByUser(User user){
+        openSession();
+        Query query = session.createQuery("Select u from User u join fetch u.orders o where u = :user").setParameter("user", user);
+        List<User> users = query.getResultList();
+        session.close();
+        return users;
+    }
+
 }

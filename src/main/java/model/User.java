@@ -1,32 +1,44 @@
 package model;
 
 import lombok.Data;
-import net.bytebuddy.asm.Advice;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
-public class User {
+@NamedQueries({@NamedQuery(name = "user.select", query = "Select u from User u where u.email=:email")})
+@EqualsAndHashCode(exclude = "address")
+@ToString(exclude = "address")
+public class User implements ModelClass {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="USR_ID")
-    private int usrId;
-    @Column(name="USR_FIRSTNAME")
+    @Column(name = "USR_ID")
+    private int id;
+    @Column(name = "USR_FIRSTNAME")
     private String firstName;
-    @Column(name="USR_LASTNAME")
+    @Column(name = "USR_LASTNAME")
     private String lastName;
-    @Column(name="USR_PASSWORD")
+    @Column(name = "USR_PASSWORD")
     private String password;
-    @Column(name="USR_EMAIL")
+    @Column(name = "USR_EMAIL")
     private String email;
-    @Column(name="USR_BIRTH_DATE")
+    @Column(name = "USR_BIRTH_DATE")
     private LocalDateTime birthDate;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="USR_ADD_ID", referencedColumnName = "ADD_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USR_ADD_ID", referencedColumnName = "ADD_ID")
     private Address address;
+    @Transient
+    private String fullName;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    Set<Order> orders = new HashSet<>();
 
-
+    public String getFullName(){
+        return fullName = firstName + " "+lastName;
+    }
 }

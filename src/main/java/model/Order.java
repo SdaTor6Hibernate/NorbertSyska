@@ -1,31 +1,40 @@
 package model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "`order`")
 @Data
-@Table(name="`order`")
-public class Order {
+@EqualsAndHashCode(exclude = {"products", "user"})
+@ToString(exclude = {"products", "user"})
+public class Order implements ModelClass {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="ORD_ID")
-    private int orderId;
-    @Column(name="ORD_DATE")
+    @Column(name = "ORD_ID")
+    private int id;
+    @Column(name = "ORD_DATE")
     private LocalDateTime orderDate;
-    @Column(name="ORD_PRICE")
-    private BigDecimal price;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="ORD_USR_ID", referencedColumnName = "USR_ID")
+    @Column(name = "ORD_PRICE")
+    private BigDecimal orderPrice;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ORD_USR_ID", referencedColumnName = "USR_ID")
     private User user;
 
-    @ManyToMany(mappedBy = "orders")
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "cart",
+            joinColumns = {@JoinColumn(name = "CRT_ORD_ID")},
+            inverseJoinColumns = {@JoinColumn(name = "CRT_PRO_ID")})
     private Set<Product> products = new HashSet<>();
+
 
 }
