@@ -22,7 +22,6 @@ public class UserCriteriaDAO {
 
     public List<User> findAllBornBetween(LocalDateTime date1,LocalDateTime date2) {
         openSession();
-        session.beginTransaction();
         CriteriaBuilder builder = session.getCriteriaBuilder();
         CriteriaQuery<User> query = builder.createQuery(User.class);
         Root<User> userRoot = query.from(User.class);
